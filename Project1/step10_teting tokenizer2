@@ -1,0 +1,7 @@
+tokanizer = SimpleTokenizerV2(voclab)
+
+text1 = "Hello, do you know KShitij?"
+text2 = " In the of  the."
+
+text = " <|endoftext|> ".join((text1, text2))
+print (text)
