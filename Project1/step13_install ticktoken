@@ -1,0 +1,22 @@
+! pip3 install tiktoken
+
+#################
+import importlib
+import tiktoken
+
+print("tiktoken version:", importlib.metadata.version("tiktoken"))
+
+###################
+
+tokanizer = tiktoken.get_encoding("gpt2")
+#############################
+
+strings = tokanizer.decode(integers)
+
+print (strings)
+###########################
+with open("book.txt", "r", encoding="utf-8") as f:
+    raw_text = f.read()
+
+enc_text = tokanizer.encode(raw_text)
+print(len(enc_text))
