@@ -1,0 +1,4 @@
+all_tokens = sorted(list(set(preprocessed)))
+all_tokens.extend(["<|endoftext|>", "<|unk|>"])
+voclab = {token:integer for integer, token in enumerate(all_tokens)}
+len(voclab.items())
