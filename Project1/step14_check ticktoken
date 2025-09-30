@@ -1,0 +1,14 @@
+context_size = 6
+
+x = enc_text[:context_size]
+y = enc_text[1:context_size+1]
+
+print(f"x: {x}")
+print(f"y:  {y}")
+##############################
+
+for i in range(1, context_size+1):
+  context = enc_text[:i]
+  desired = enc_text[i]
+
+  print(tokanizer.decode(context), "---->", tokanizer.decode([desired]))
