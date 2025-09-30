@@ -1,0 +1,6 @@
+tokanizer = SimpleTokenizerV1(voclab)
+
+text = """It's the last he painted, you know,"
+          Mr. Gisburn said pride."""
+ids = tokanizer.encode(text)
+print(ids)
