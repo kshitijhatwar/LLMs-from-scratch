@@ -1,0 +1,6 @@
+voclab = {token:integer for integer, token in enumerate(all_words)}
+
+for i, item in enumerate(voclab.items()):
+  print(item)
+  if i >= 50:
+    break
