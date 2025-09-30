@@ -1,0 +1,5 @@
+tokanizer.encode(text)
+
+###############
+
+tokanizer.decode(tokanizer.encode(text))
