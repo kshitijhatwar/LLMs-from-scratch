@@ -1,0 +1,2 @@
+for i, item in enumerate(list(voclab.items())[-5:]):
+  print(item)
