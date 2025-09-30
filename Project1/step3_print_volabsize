@@ -1,0 +1,4 @@
+all_words = sorted(set(preprocessed))
+voclab_size = len(all_words)
+
+print(voclab_size)
