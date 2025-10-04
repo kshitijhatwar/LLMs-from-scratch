@@ -14,13 +14,6 @@ spec:
       containers:
       - name: llm-training
         image: kshitijhatwar/llm-train:latest
-        resources:
-          requests:
-            memory: "4Gi"
-            cpu: "4"
-          limits:
-            memory: "9Gi"
-            cpu: "9"
         volumeMounts:
         - name: llm-data
           mountPath: /app/data
