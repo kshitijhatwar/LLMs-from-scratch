@@ -1,0 +1,4 @@
+torch==2.8.0+cpu       # CPU-only version (change to GPU version if needed)
+tiktoken
+numpy
+pandas
