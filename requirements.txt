@@ -1,4 +1,7 @@
-torch==2.8.0+cpu       # CPU-only version (change to GPU version if needed)
+# Linux CPU-only PyTorch (Ubuntu 24)
+torch==2.8.0
+torchvision==0.23.0
+torchaudio==2.8.0
 tiktoken
 numpy
 pandas
