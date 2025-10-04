@@ -11,7 +11,7 @@ spec:
       restartPolicy: Never
       containers:
       - name: llm-training
-        image: llm-training:latest
+        image: kshitijhatwar/llm-train:latest
         resources:
           requests:
             memory: "2Gi"
