@@ -1,6 +1,6 @@
 from google.colab import files
 
-# This will prompt you to select book.txt from your local system
+# #This will prompt you to select book.txt from your local system
 uploaded = files.upload()
 
 # Now you can open it as usual
