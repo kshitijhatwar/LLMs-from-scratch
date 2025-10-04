@@ -14,11 +14,11 @@ spec:
         image: kshitijhatwar/llm-train:latest
         resources:
           requests:
-            memory: "2Gi"
-            cpu: "1"
+            memory: "5Gi"
+            cpu: "5"
           limits:
-            memory: "3Gi"
-            cpu: "2"
+            memory: "8Gi"
+            cpu: "8"
         volumeMounts:
         - name: llm-data
           mountPath: /app/data
