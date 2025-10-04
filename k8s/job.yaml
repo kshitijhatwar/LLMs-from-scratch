@@ -1,0 +1,28 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: llm-training-job
+spec:
+  completions: 4       # total pods to complete
+  parallelism: 2       # max pods running at the same time
+  backoffLimit: 3
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: llm-training
+        image: llm-training:latest
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "1"
+          limits:
+            memory: "3Gi"
+            cpu: "2"
+        volumeMounts:
+        - name: llm-data
+          mountPath: /app/data
+      volumes:
+      - name: llm-data
+        persistentVolumeClaim:
+          claimName: llm-data-pvc
