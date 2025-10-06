@@ -8,8 +8,8 @@ spec:
   backoffLimit: 3
   template:
     spec:
-      nodeSelector:
-        kubernetes.io/hostname: k8-workernode02
+      #nodeSelector:
+        #kubernetes.io/hostname: k8-workernode02
       restartPolicy: Never
       containers:
       - name: llm-training
@@ -21,4 +21,5 @@ spec:
       - name: llm-data
         persistentVolumeClaim:
           claimName: llm-data-pvc
+
 
