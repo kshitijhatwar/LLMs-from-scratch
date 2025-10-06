@@ -4,7 +4,7 @@ metadata:
   name: llm-training-job
 spec:
   #completions: 4       # total pods to complete
-  #parallelism: 2       # max pods running at the same time
+  parallelism: 2       # max pods running at the same time
   backoffLimit: 3
   template:
     spec:
@@ -21,5 +21,6 @@ spec:
       - name: llm-data
         persistentVolumeClaim:
           claimName: llm-data-pvc
+
 
 
