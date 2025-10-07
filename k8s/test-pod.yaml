@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pvc-check
+spec:
+  containers:
+  - name: check
+    image: ubuntu
+    command: ["sleep", "3600"]
+    volumeMounts:
+    - name: llm-data
+      mountPath: /mnt/data
+  volumes:
+  - name: llm-data
+    persistentVolumeClaim:
+      claimName: llm-data-pvc
