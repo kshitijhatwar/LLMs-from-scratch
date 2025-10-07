@@ -709,14 +709,29 @@ torch.save({
     }, 
     "model_and_optimizer.pth"
 )
+####
+import torch
+import os
+# Ensure directory exists
+os.makedirs("/app/data", exist_ok=True)
 
+save_path = "/app/data/model_and_optimizer.pth"
 
+torch.save({
+    "model_state_dict": model.state_dict(),
+    "optimizer_state_dict": optimizer.state_dict(),
+}, save_path)
+
+print(f"✅ Model saved successfully to {save_path}")
+
+#####
 checkpoint = torch.load("model_and_optimizer.pth")
 model = GPTModel(GPT_CONFIG_124M)
 model.load_state_dict(checkpoint["model_state_dict"])
 optimizer = torch.optim.AdamW(model.parameters(), lr=5e-4, weight_decay=0.1)
 optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
 model.train();
+
 
 
 
