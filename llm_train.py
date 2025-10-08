@@ -733,7 +733,6 @@ optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
 model.train();
 
 ######################
-pip install tensorflow>=2.15.0 tqdm>=4.66
 
 import tensorflow as tf
 import tqdm
@@ -745,6 +744,7 @@ print("tqdm version:", tqdm.__version__)
 from gpt_download3 import download_and_load_gpt2
 
 settings, params = download_and_load_gpt2(model_size="124M", models_dir="gpt2")
+
 
 
 
