@@ -949,9 +949,10 @@ print(len(train_df))
 print(len(validation_df))
 print(len(test_df))
 
-train_df.to_csv("/mnt/data/train.csv", index=None)
-validation_df.to_csv("/mnt/data/validation.csv", index=None)
-test_df.to_csv("/mnt/data/test.csv", index=None)
+train_df.to_csv("/app/data/train.csv", index=None)
+validation_df.to_csv("/app/data/validation.csv", index=None)
+test_df.to_csv("/app/data/test.csv", index=None)
+
 
 
 
