@@ -1007,7 +1007,7 @@ class SpamDataset(Dataset):
 
 
 train_dataset = SpamDataset(
-    csv_file="train.csv",
+    csv_file="/app/data/train.csv",
     max_length=None,
     tokenizer=tokenizer
 )
@@ -1017,12 +1017,12 @@ print(train_dataset.max_length)
 
 
 val_dataset = SpamDataset(
-    csv_file="validation.csv",
+    csv_file="/app/data/validation.csv",
     max_length=train_dataset.max_length,
     tokenizer=tokenizer
 )
 test_dataset = SpamDataset(
-    csv_file="test.csv",
+    csv_file="/app/data/test.csv",
     max_length=train_dataset.max_length,
     tokenizer=tokenizer
 )
@@ -1070,6 +1070,7 @@ print("Label batch dimensions", target_batch.shape)
 print(f"{len(train_loader)} training batches")
 print(f"{len(val_loader)} validation batches")
 print(f"{len(test_loader)} test batches")
+
 
 
 
