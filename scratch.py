@@ -18,8 +18,9 @@ preprocessed = [item.strip() for item in preprocessed if item.strip()]    ### re
 print(preprocessed[:30])
 print(len(preprocessed))
 
-##### creating list of all unique tokens and sorting them alphabetacally
+##### creating list of all unique tokens and sorting them alphabetacally, also adding endoftext and unki(to use for token not present in dictonary)
 all_words = sorted(set(preprocessed))
+all_words.extend(["<|endoftext|>", "<|unk|>"])
 vocab_size = len(all_words)
 print(vocab_size)
 
