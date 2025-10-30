@@ -1,11 +1,12 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: llm-data-pvc
+  name: llm3-data-pvc
 spec:
   storageClassName: nfs-client
   accessModes:
     - ReadWriteMany
   resources:
     requests:
-      storage: 20Gi
+      storage: 10Gi
+
