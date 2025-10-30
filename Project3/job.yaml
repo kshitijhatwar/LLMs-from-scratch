@@ -1,0 +1,36 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: llm-training-job
+spec:
+  completions: 4       # total pods to complete
+  parallelism: 2       # max pods running at the same time
+  backoffLimit: 3
+  template:
+    spec:
+      #nodeSelector:
+        #kubernetes.io/hostname: k8-workernode02
+      restartPolicy: Never
+      containers:
+      - name: llm-training
+        image: kshitijhatwar/llm-train:latest
+        resources:
+          requests:
+            cpu: "4"
+            memory: "5Gi"
+          limits:
+            cpu: "6"
+            memory: "8Gi"
+        volumeMounts:
+        - name: llm-data
+          mountPath: /app/data
+      volumes:
+      - name: llm-data
+        persistentVolumeClaim:
+          claimName: llm-data-pvc
+
+
+
+
+
+
