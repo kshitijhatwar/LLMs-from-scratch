@@ -1,7 +1,5 @@
 ############## Importing boook
 ##############
-from google.colab import files
-uploaded = files.upload()
 
 with open("book.txt", "r", encoding="utf-8") as f:
     raw_text = f.read()
