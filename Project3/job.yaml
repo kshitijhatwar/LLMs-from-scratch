@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: llm-training-job
+  name: llm3-training-job
 spec:
   completions: 4       # total pods to complete
   parallelism: 2       # max pods running at the same time
@@ -12,8 +12,8 @@ spec:
         #kubernetes.io/hostname: k8-workernode02
       restartPolicy: Never
       containers:
-      - name: llm-training
-        image: kshitijhatwar/llm-train:latest
+      - name: llm3-training
+        image: kshitijhatwar/llm-train3:latest
         resources:
           requests:
             cpu: "4"
@@ -27,7 +27,8 @@ spec:
       volumes:
       - name: llm-data
         persistentVolumeClaim:
-          claimName: llm-data-pvc
+          claimName: llm3-data-pvc
+
 
 
 
