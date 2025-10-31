@@ -13,7 +13,7 @@ spec:
       restartPolicy: Never
       containers:
       - name: llm2-training
-        image: kshitijhatwar/llm-train2:1
+        image: kshitijhatwar/llm-train2.1:1
         resources:
           requests:
             cpu: "4"
@@ -28,6 +28,7 @@ spec:
       - name: llm-data
         persistentVolumeClaim:
           claimName: llm2-data-pvc
+
 
 
 
