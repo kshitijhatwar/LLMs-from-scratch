@@ -1,13 +1,41 @@
+
+with open("book.txt", "r", encoding="utf-8") as f:
+    raw_text = f.read()
+
+total_characters = len(raw_text)
+
+
+##########################################################
+##############################################
+
+# First 100 characters
+print(raw_text[:99])
+
+# Last 100 characters
+print(raw_text[-99:])
+
 ###########################Using BYTE PAIR ENCODING (BPE)
 ##########################
 import importlib
 import tiktoken
 
 tokenizer = tiktoken.get_encoding("gpt2")
-###############################################################
-####################################################
+total_tokens = len(tokenizer.encode(raw_text))
+
+##########
+
+total_characters = len(raw_text)
+total_tokens = len(tokenizer.encode(raw_text))
+
+print("Characters:", total_characters)
+print("Tokens:", total_tokens)
+
+###################################### Creating DataLoader
+#####################################
 from torch import nn
 from torch.utils.data import Dataset, DataLoader
+import torch
+
 
 class GPTDatasetV1(Dataset):
     def __init__(self, txt, tokenizer, max_length, stride):
@@ -30,8 +58,6 @@ class GPTDatasetV1(Dataset):
     def __getitem__(self, idx):
         return self.input_ids[idx], self.target_ids[idx]
 
-###################################### Creating DataLoader
-#####################################
 
 def create_dataloader_v1(txt, batch_size=4, max_length=256,
                          stride=128, shuffle=True, drop_last=True,
@@ -54,45 +80,94 @@ def create_dataloader_v1(txt, batch_size=4, max_length=256,
 
     return dataloader
 
+###################################################################
+#############
+GPT_CONFIG_124M = {
+    "vocab_size": 50257,   # Vocabulary size
+    "context_length": 256, # Shortened context length (orig: 1024)
+    "emb_dim": 768,        # Embedding dimension
+    "n_heads": 12,         # Number of attention heads
+    "n_layers": 12,        # Number of layers
+    "drop_rate": 0.1,      # Dropout rate
+    "qkv_bias": False      # Query-key-value bias
+}
 
-##########################################################
-##############################################
+##############################
+########################
 
-with open("book.txt", "r", encoding="utf-8") as f:
-    raw_text = f.read()
+# Train/validation ratio
+train_ratio = 0.90
+split_idx = int(train_ratio * len(raw_text))
+train_data = raw_text[:split_idx]
+val_data = raw_text[split_idx:]
 
-total_characters = len(raw_text)
-total_tokens = len(tokenizer.encode(raw_text))
 
-#################################################
-############################################3
+torch.manual_seed(123)
 
-import torch
-
-vocab_size = 50257
-output_dim = 256
-
-token_embedding_layer = torch.nn.Embedding(vocab_size, output_dim)
-
-max_length = 4
-dataloader = create_dataloader_v1(
-    raw_text, batch_size=8, max_length=max_length,
-    stride=max_length, shuffle=False
+train_loader = create_dataloader_v1(
+    train_data,
+    batch_size=2,
+    max_length=GPT_CONFIG_124M["context_length"],
+    stride=GPT_CONFIG_124M["context_length"],
+    drop_last=True,
+    shuffle=True,
+    num_workers=0
 )
-data_iter = iter(dataloader)
-inputs, targets = next(data_iter)
 
-################################
-#########################Positional Embedding
-token_embeddings = token_embedding_layer(inputs)
+val_loader = create_dataloader_v1(
+    val_data,
+    batch_size=2,
+    max_length=GPT_CONFIG_124M["context_length"],
+    stride=GPT_CONFIG_124M["context_length"],
+    drop_last=False,
+    shuffle=False,
+    num_workers=0
+)
 
-context_length = max_length
-pos_embedding_layer = torch.nn.Embedding(context_length, output_dim)
+#################
+############
+# Sanity check
 
-pos_embeddings = pos_embedding_layer(torch.arange(max_length))
+if total_tokens * (train_ratio) < GPT_CONFIG_124M["context_length"]:
+    print("Not enough tokens for the training loader. "
+          "Try to lower the `GPT_CONFIG_124M['context_length']` or "
+          "increase the `training_ratio`")
 
-input_embeddings = token_embeddings + pos_embeddings
+if total_tokens * (1-train_ratio) < GPT_CONFIG_124M["context_length"]:
+    print("Not enough tokens for the validation loader. "
+          "Try to lower the `GPT_CONFIG_124M['context_length']` or "
+          "decrease the `training_ratio`")
+    
+##############
+##########
+##sancheck
+print("Train loader:")
+for x, y in train_loader:
+    print(x.shape, y.shape)
 
+print("\nValidation loader:")
+for x, y in val_loader:
+    print(x.shape, y.shape)
+
+print(len(train_loader))
+print(len(val_loader))
+
+
+###
+train_tokens = 0
+for input_batch, target_batch in train_loader:
+    train_tokens += input_batch.numel()
+
+val_tokens = 0
+for input_batch, target_batch in val_loader:
+    val_tokens += input_batch.numel()
+
+print("Training tokens:", train_tokens)
+print("Validation tokens:", val_tokens)
+print("All tokens:", train_tokens + val_tokens)
+
+#############################
+#####################
 #########################################################
 ############################################## Multi Head  Attention
 
@@ -156,69 +231,6 @@ class MultiHeadAttention(nn.Module):
 
         return context_vec
     
-
-##############################################################
-################################################# GPT ARCHITECTURE
-
-GPT_CONFIG_124M = {
-    "vocab_size": 50257,    # Vocabulary size
-    "context_length": 1024, # Context length
-    "emb_dim": 768,         # Embedding dimension
-    "n_heads": 12,          # Number of attention heads
-    "n_layers": 12,         # Number of layers
-    "drop_rate": 0.1,       # Dropout rate
-    "qkv_bias": False       # Query-Key-Value bias
-}
-
-#########################################################################
-########################################################## Train/validation ratio
-
-train_ratio = 0.90
-split_idx = int(train_ratio * len(raw_text))
-train_data = raw_text[:split_idx]
-val_data = raw_text[split_idx:]
-
-
-torch.manual_seed(123)
-
-train_loader = create_dataloader_v1(
-    train_data,
-    batch_size=2,
-    max_length=GPT_CONFIG_124M["context_length"],
-    stride=GPT_CONFIG_124M["context_length"],
-    drop_last=True,
-    shuffle=True,
-    num_workers=0
-)
-
-val_loader = create_dataloader_v1(
-    val_data,
-    batch_size=2,
-    max_length=GPT_CONFIG_124M["context_length"],
-    stride=GPT_CONFIG_124M["context_length"],
-    drop_last=False,
-    shuffle=False,
-    num_workers=0
-)
-
-
-######################################################
-########################################### Sanity check
-
-if total_tokens * (train_ratio) < GPT_CONFIG_124M["context_length"]:
-    print("Not enough tokens for the training loader. "
-          "Try to lower the `GPT_CONFIG_124M['context_length']` or "
-          "increase the `training_ratio`")
-
-if total_tokens * (1-train_ratio) < GPT_CONFIG_124M["context_length"]:
-    print("Not enough tokens for the validation loader. "
-          "Try to lower the `GPT_CONFIG_124M['context_length']` or "
-          "decrease the `training_ratio`")
-    
-
-
-
-
 ##########################################################################3
 ############################################ THE BUILDING BLOCKS: LAYER NORMALIZATION, GELU AND FEED-FORWARD NEURAL NETWORK
 
@@ -296,9 +308,8 @@ class TransformerBlock(nn.Module):
         # 2*4*768
 
 
-#################################################3
-############################################# GPTModel
-
+################
+#######
 class GPTModel(nn.Module):
     def __init__(self, cfg):
         super().__init__()
@@ -324,32 +335,72 @@ class GPTModel(nn.Module):
         x = self.final_norm(x)
         logits = self.out_head(x)
         return logits
-    
-#########################################################3
-####################################################
-
-import tiktoken
-tokenizer = tiktoken.get_encoding("gpt2")
-batch = []
-txt1 = "Every effort moves you"
-txt2 = "Every day holds a"
-batch.append(torch.tensor(tokenizer.encode(txt1)))
-batch.append(torch.tensor(tokenizer.encode(txt2)))
-batch = torch.stack(batch, dim=0)
-print(batch)
-
-####
 
 torch.manual_seed(123)
 model = GPTModel(GPT_CONFIG_124M)
-out = model(batch)
-print("Input batch:\n", batch)
-print("\nOutput shape:", out.shape)
-print(out)
+model.eval();  # Disable dropout during inference
 
-#########################################################
-############################################### utility function to calculate the cross-entropy loss
+#######################
 
+def generate_text_simple(model, idx, max_new_tokens, context_size):
+    # idx is (batch, n_tokens) array of indices in the current context
+
+    ###Input batch:
+ ###tensor([[6109, 3626, 6100,  345],
+        ##[6109, 1110, 6622,  257]])
+
+    for _ in range(max_new_tokens):
+
+        # Crop current context if it exceeds the supported context size
+        # E.g., if LLM supports only 5 tokens, and the context size is 10
+        # then only the last 5 tokens are used as context
+        idx_cond = idx[:, -context_size:]
+
+        # Get the predictions
+        with torch.no_grad():
+            logits = model(idx_cond) ### batch, n_tokens, vocab_size
+
+        # Focus only on the last time step
+        # (batch, n_tokens, vocab_size) becomes (batch, vocab_size)
+        logits = logits[:, -1, :]
+
+        # Apply softmax to get probabilities
+        probas = torch.softmax(logits, dim=-1)  # (batch, vocab_size)
+
+        # Get the idx of the vocab entry with the highest probability value
+        idx_next = torch.argmax(probas, dim=-1, keepdim=True)  # (batch, 1)
+
+        # Append sampled index to the running sequence
+        idx = torch.cat((idx, idx_next), dim=1)  # (batch, n_tokens+1)
+
+    return idx
+
+##########################
+import tiktoken
+
+def text_to_token_ids(text, tokenizer):
+    encoded = tokenizer.encode(text, allowed_special={'<|endoftext|>'})
+    encoded_tensor = torch.tensor(encoded).unsqueeze(0) # add batch dimension
+    return encoded_tensor
+
+def token_ids_to_text(token_ids, tokenizer):
+    flat = token_ids.squeeze(0) # remove batch dimension
+    return tokenizer.decode(flat.tolist())
+
+start_context = "Every effort moves you"
+
+
+
+token_ids = generate_text_simple(
+    model=model,
+    idx=text_to_token_ids(start_context, tokenizer),
+    max_new_tokens=10,
+    context_size=GPT_CONFIG_124M["context_length"]
+)
+
+print("Output text:\n", token_ids_to_text(token_ids, tokenizer))
+
+###############
 def calc_loss_batch(input_batch, target_batch, model, device):
     input_batch, target_batch = input_batch.to(device), target_batch.to(device)
     logits = model(input_batch)
@@ -375,8 +426,8 @@ def calc_loss_loader(data_loader, model, device, num_batches=None):
             break
     return total_loss / num_batches
 
-#############################################################################
-######################################################### CPU
+#########################
+####################
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -407,5 +458,90 @@ with torch.no_grad(): # Disable gradient tracking for efficiency because we are 
 print("Training loss:", train_loss)
 print("Validation loss:", val_loss)
 
+############################################
+#######################################TRAINING LOOP FOR THE LLM
 
+def train_model_simple(model, train_loader, val_loader, optimizer, device, num_epochs,
+                       eval_freq, eval_iter, start_context, tokenizer):
+    # Initialize lists to track losses and tokens seen
+    train_losses, val_losses, track_tokens_seen = [], [], []
+    tokens_seen, global_step = 0, -1
 
+    # Main training loop
+    for epoch in range(num_epochs):
+        model.train()  # Set model to training mode
+
+        for input_batch, target_batch in train_loader:
+            optimizer.zero_grad() # Reset loss gradients from previous batch iteration
+            loss = calc_loss_batch(input_batch, target_batch, model, device)
+            loss.backward() # Calculate loss gradients
+            optimizer.step() # Update model weights using loss gradients
+            tokens_seen += input_batch.numel() # Returns the total number of elements (or tokens) in the input_batch.
+            global_step += 1
+
+            # Optional evaluation step
+            if global_step % eval_freq == 0:
+                train_loss, val_loss = evaluate_model(
+                    model, train_loader, val_loader, device, eval_iter)
+                train_losses.append(train_loss)
+                val_losses.append(val_loss)
+                track_tokens_seen.append(tokens_seen)
+                print(f"Ep {epoch+1} (Step {global_step:06d}): "
+                      f"Train loss {train_loss:.3f}, Val loss {val_loss:.3f}")
+
+        # Print a sample text after each epoch
+        generate_and_print_sample(
+            model, tokenizer, device, start_context
+        )
+
+    return train_losses, val_losses, track_tokens_seen
+
+#########################################
+
+def evaluate_model(model, train_loader, val_loader, device, eval_iter):
+    model.eval()
+    with torch.no_grad():
+        train_loss = calc_loss_loader(train_loader, model, device, num_batches=eval_iter)
+        val_loss = calc_loss_loader(val_loader, model, device, num_batches=eval_iter)
+    model.train()
+    return train_loss, val_loss
+
+#######################################################
+
+def generate_and_print_sample(model, tokenizer, device, start_context):
+    model.eval()
+    context_size = model.pos_emb.weight.shape[0]
+    encoded = text_to_token_ids(start_context, tokenizer).to(device)
+    with torch.no_grad():
+        token_ids = generate_text_simple(
+            model=model, idx=encoded,
+            max_new_tokens=50, context_size=context_size
+        )
+    decoded_text = token_ids_to_text(token_ids, tokenizer)
+    print(decoded_text.replace("\n", " "))  # Compact print format
+    model.train()
+
+################################################
+
+# Note:
+# Uncomment the following code to calculate the execution time
+import time
+start_time = time.time()
+
+torch.manual_seed(123)
+model = GPTModel(GPT_CONFIG_124M)
+model.to(device)
+optimizer = torch.optim.AdamW(model.parameters(), lr=0.0004, weight_decay=0.1)
+
+num_epochs = 10
+train_losses, val_losses, tokens_seen = train_model_simple(
+    model, train_loader, val_loader, optimizer, device,
+    num_epochs=num_epochs, eval_freq=5, eval_iter=5,
+    start_context="Every effort moves you", tokenizer=tokenizer
+)
+
+# Note:
+# Uncomment the following code to show the execution time
+end_time = time.time()
+execution_time_minutes = (end_time - start_time) / 60
+print(f"Training completed in {execution_time_minutes:.2f} minutes.")
