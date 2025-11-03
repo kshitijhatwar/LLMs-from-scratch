@@ -400,7 +400,7 @@ token_ids = generate_text_simple(
 
 print("Output text:\n", token_ids_to_text(token_ids, tokenizer))
 
-###############
+################
 def calc_loss_batch(input_batch, target_batch, model, device):
     input_batch, target_batch = input_batch.to(device), target_batch.to(device)
     logits = model(input_batch)
