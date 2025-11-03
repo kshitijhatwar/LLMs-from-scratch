@@ -82,16 +82,13 @@ inputs, targets = next(data_iter)
 ################################
 #########################Positional Embedding
 token_embeddings = token_embedding_layer(inputs)
-print(token_embeddings.shape)
 
 context_length = max_length
 pos_embedding_layer = torch.nn.Embedding(context_length, output_dim)
 
 pos_embeddings = pos_embedding_layer(torch.arange(max_length))
-print(pos_embeddings.shape)
 
 input_embeddings = token_embeddings + pos_embeddings
-print(input_embeddings.shape)
 
 #########################################################
 ############################################## Multi Head  Attention
@@ -157,5 +154,26 @@ class MultiHeadAttention(nn.Module):
         return context_vec
     
 
+##########################################################################3
+################################################# Layer Norm
+
+
+
+class LayerNorm(nn.Module):
+    def __init__(self, emb_dim):
+        super().__init__()
+        self.eps = 1e-5
+        self.scale = nn.Parameter(torch.ones(emb_dim))
+        self.shift = nn.Parameter(torch.zeros(emb_dim))
+
+    def forward(self, x):
+        mean = x.mean(dim=-1, keepdim=True)
+        var = x.var(dim=-1, keepdim=True, unbiased=False)
+        norm_x = (x - mean) / torch.sqrt(var + self.eps)
+        return self.scale * norm_x + self.shift
     
+
+############################################
+#######################################
+
 
